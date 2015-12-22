@@ -139,15 +139,12 @@ public class Main
             if ( renderGrid ) {
                 c = node -> 
                 {
-                    node.data.forEach( obj -> render(obj,g) );
+                    node.visitData( obj -> render(obj,g) );
                     node.populateBoundingBox( bb );
                     render( bb , g );
                 };
             } else {
-                c = node -> 
-                {
-                    node.data.forEach( obj -> render(obj,g) );
-                };                
+                c = node -> node.visitData( obj -> render(obj,g) );
             }
             tree.visit(c);
             renderAxis( g );
