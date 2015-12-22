@@ -26,7 +26,9 @@ public class Main
 		System.loadLibrary("gdx64");
 	}
 
-	private static final int POINTS = 512000;
+	private static final int POINTS = 20000;
+	
+	public static final int MAX_OBJS_PER_NODE = 5; // needs to be at least 2
 	
 	private static final float TRANSLATION = 10f;
 	private static final float ROT_DEG = 1f;
@@ -273,9 +275,9 @@ public class Main
 	
 	private static void randomize(Vector3 p) 
 	{
-		float x = -WORLD_SIZE/2 + RND.nextFloat()*WORLD_SIZE;
-		float y = -WORLD_SIZE/2 + RND.nextFloat()*WORLD_SIZE;
-		float z = -WORLD_SIZE/2 + RND.nextFloat()*WORLD_SIZE;
-		p.set(x,y,z);
+	    p.x = RND.nextFloat();
+	    p.y = -1+RND.nextFloat()*2;
+	    p.z = -1+RND.nextFloat()*2;
+	    p.nor().scl( WORLD_SIZE/2 );
 	}	
 }

@@ -16,23 +16,6 @@ public class Octree<T extends IObjectWithPosition>
 	protected static final int QUAD_6 = 6;
 	protected static final int QUAD_7 = 7;
 	
-	public static final int MAX_OBJS_PER_NODE = 10;
-	
-	protected static final class ListNode<T> 
-	{
-	    public ListNode<T> next;
-	    public T value;
-	    
-	    public ListNode(T value) {
-	        this.value = value;
-	    }
-	    
-	    public ListNode(T value,ListNode<T> next) {
-	        this.value = value;
-	        this.next = next;
-	    }
-	}
-	
 	public static final class Node<T extends IObjectWithPosition>
 	{
 		public final Vector3 center = new Vector3();
@@ -44,20 +27,11 @@ public class Octree<T extends IObjectWithPosition>
 		public final Object[] data; 
 		public int dataCount;
 		
-		@SuppressWarnings("unchecked")
         public Node(float x,float y,float z,float halfWidth) 
 		{
 			this.center.set(x,y,z);
 			this.halfWidth = halfWidth;
-			this.data = new Object[ MAX_OBJS_PER_NODE ];
-		}
-		
-		public void clear() 
-		{
-		    dataCount = 0;
-		    for ( int i = 0 ; i < 8 ; i++ ) {
-		        children[i]=null;
-		    }
+			this.data = new Object[ Main.MAX_OBJS_PER_NODE ];
 		}
 		
 		public void visitData(Consumer<T> visitor) 
@@ -145,7 +119,7 @@ public class Octree<T extends IObjectWithPosition>
 		{
 			final Vector3 pos = obj.getPosition();
 			Node<T> node = findNode( pos );
-			while( node.dataCount >= MAX_OBJS_PER_NODE ) {
+			while ( node.dataCount >= Main.MAX_OBJS_PER_NODE ) {
 		        node.split();
 		        node = node.findNode( pos );
 			} 
@@ -206,7 +180,8 @@ public class Octree<T extends IObjectWithPosition>
 outer:			
 			for ( int i = 0 , len = dataCount ; i < len ; i++ )
 			{
-				final T obj = (T) data[i];
+				@SuppressWarnings("unchecked")
+                final T obj = (T) data[i];
 				final Vector3 pos = obj.getPosition();
 				for (int j = 0 ; j < 8 ; j++ ) 
 				{
@@ -265,9 +240,5 @@ outer:
 	
 	public void visit(Consumer<Node<T>> visitor) {
 		root.visit( visitor );
-	}
-	
-	public void clear() {
-	    root.clear();
-	}
+	}	
 }
