@@ -16,7 +16,7 @@ public class Octree<T extends IObjectWithPosition>
 	protected static final int QUAD_6 = 6;
 	protected static final int QUAD_7 = 7;
 	
-	public static final int MAX_OBJS_PER_NODE = 1;
+	public static final int MAX_OBJS_PER_NODE = 10;
 	
 	protected static final class ListNode<T> 
 	{
@@ -41,18 +41,19 @@ public class Octree<T extends IObjectWithPosition>
 		@SuppressWarnings("unchecked")
 		public final Node<T>[] children = new Node[8];
 		
-		public ListNode<T> data;
+		public final Object[] data; 
 		public int dataCount;
 		
-		public Node(float x,float y,float z,float halfWidth) 
+		@SuppressWarnings("unchecked")
+        public Node(float x,float y,float z,float halfWidth) 
 		{
 			this.center.set(x,y,z);
 			this.halfWidth = halfWidth;
+			this.data = new Object[ MAX_OBJS_PER_NODE ];
 		}
 		
 		public void clear() 
 		{
-		    data = null;
 		    dataCount = 0;
 		    for ( int i = 0 ; i < 8 ; i++ ) {
 		        children[i]=null;
@@ -61,20 +62,15 @@ public class Octree<T extends IObjectWithPosition>
 		
 		public void visitData(Consumer<T> visitor) 
 		{
-		    ListNode<T> current = data;
-		    while( current != null ) {
-		        visitor.accept( current.value );
-		        current = current.next;
+		    for ( int i =0, len = dataCount ; i < len ; i++ ) {
+		        visitor.accept( (T) data[i] );
 		    }
 		}
 		
-		private void prependValue(T value) {
-		    if ( data == null ) {
-		        data = new ListNode<T>(value);
-		    } else {
-		        data = new ListNode<T>( value , data );
-		    }
-	        dataCount++;
+		private void prependValue(T value) 
+		{
+		    data[dataCount] = value;
+		    dataCount++;
 		}
 		
 		@Override
@@ -149,11 +145,10 @@ public class Octree<T extends IObjectWithPosition>
 		{
 			final Vector3 pos = obj.getPosition();
 			Node<T> node = findNode( pos );
-			if ( node.dataCount == MAX_OBJS_PER_NODE ) 
-			{
-				node.split();
-				node = node.findNode( pos );
-			}
+			while( node.dataCount >= MAX_OBJS_PER_NODE ) {
+		        node.split();
+		        node = node.findNode( pos );
+			} 
 			node.prependValue( obj );
 		}		
 		
@@ -208,24 +203,21 @@ public class Octree<T extends IObjectWithPosition>
 			children[QUAD_7] = new Node<T>( center2.x , center2.y , center2.z , newWidth );
 			children[QUAD_6] = new Node<T>( center3.x , center3.y , center3.z , newWidth );
 			
-			ListNode<T> currentNode = data;
 outer:			
-			while ( currentNode != null ) 
+			for ( int i = 0 , len = dataCount ; i < len ; i++ )
 			{
-				final T obj = currentNode.value;
+				final T obj = (T) data[i];
 				final Vector3 pos = obj.getPosition();
 				for (int j = 0 ; j < 8 ; j++ ) 
 				{
 					if ( children[j].contains( pos ) ) 
 					{
 						children[j].add( obj );
-						currentNode = currentNode.next;
 						continue outer;
 					}
 				}
 				throw new RuntimeException("Unreachable code reached, no child contains "+obj+" @ "+pos);
 			}
-			data = null;
 			dataCount = 0;
 		}
 	}

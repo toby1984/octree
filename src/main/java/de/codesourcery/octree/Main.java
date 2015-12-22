@@ -26,7 +26,7 @@ public class Main
 		System.loadLibrary("gdx64");
 	}
 
-	private static final int POINTS = 65535;
+	private static final int POINTS = 512000;
 	
 	private static final float TRANSLATION = 10f;
 	private static final float ROT_DEG = 1f;
@@ -250,6 +250,7 @@ public class Main
 	    long time = Long.MAX_VALUE;
 	    for ( int i = 0 ; i < 20 ; i++ ) {
 	        time = Math.min( time , setupOctree() );
+	        System.out.println("Time: "+time);
 	    }
 	    System.out.println("Best time: "+time);
 	    
