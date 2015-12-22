@@ -28,7 +28,7 @@ public class Main
 
 	private static final int POINTS = 20000;
 	
-	public static final int MAX_OBJS_PER_NODE = 5; // needs to be at least 2
+	public static final int MAX_OBJS_PER_NODE = 1; // needs to be at least 2
 	
 	private static final float TRANSLATION = 10f;
 	private static final float ROT_DEG = 1f;
@@ -141,9 +141,11 @@ public class Main
             if ( renderGrid ) {
                 c = node -> 
                 {
-                    node.visitData( obj -> render(obj,g) );
-                    node.populateBoundingBox( bb );
-                    render( bb , g );
+//                    if ( node.dataCount > 0 ) {
+                        node.visitData( obj -> render(obj,g) );
+                        node.populateBoundingBox( bb );
+                        render( bb , g );
+//                    }
                 };
             } else {
                 c = node -> node.visitData( obj -> render(obj,g) );
